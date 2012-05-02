@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MyProject" basedir=".">
+  <description>
+    foobar
+  </description>
+
+  <target name="init">
+  	<mkdir dir="${basedir}/target/generated-classes"/>
+  </target>
+
+  <target name="compile-ruby" depends="init">
+  	<exec executable="jrubyc" dir="${basedir}/src/main/ruby">
+  	  <arg value="-t"/>
+  	  <arg value="${basedir}/target/generated-classes"/>
+  	  <arg value="."/>
+  	</exec>
+  	<echo message="hello"/>
+  </target>
+</project>
