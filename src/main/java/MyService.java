@@ -11,12 +11,9 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jruby.Ruby;
-import org.jruby.RubyClass;
 import org.jruby.javasupport.JavaEmbedUtils;
-import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.builtin.IRubyObject;
-import org.yaml.snakeyaml.Yaml;
 
 import com.google.gson.Gson;
 
@@ -27,11 +24,6 @@ public class MyService {
 	private static Ruby rt;
 	
 	public void initialize() throws IOException {
-		
-//		export LP=$H:$G/liquid-2.3.0/lib:$H/lib:$G/addressable-2.2.7/lib:$G/faraday-0.7.6/lib:$G/rack-1.4.1/lib:$R:$G/sinatra-1.2.6/lib:\
-//				$G/tilt-1.2.2/lib:$G/tinder-1.7.0/lib:$G/activesupport-3.0.10/lib:$G/faraday_middleware-0.8.7/lib:$G/xmpp4r-0.5/lib:\
-//				$G/i18n-0.5.0/lib:$G/mail-2.3.0/lib:$G/mime-types-1.18/lib:$G/treetop-1.4.10/lib
-
 		String[] paths = new String[] {
 				RUBY_HOME, GS+"/lib", GS+"/services", GEMS+"/liquid-2.3.0/lib", GEMS+"/activesupport-3.0.10/lib",
 				GEMS+"/i18n-0.5.0/lib", GEMS+"/mail-2.3.0/lib", GEMS+"/mime-types-1.18/lib", GEMS+"/treetop-1.4.10/lib",
@@ -47,22 +39,20 @@ public class MyService {
 	}
 
 	public void processRequest(Map<String, String> requestParameters) {
-//		IRubyObject rubyService = rt.evalScriptlet("Service::CommitMsgChecker.new");
-		
+		// instantiate service
 		Map<String, String> data = getConfig();
-//		System.out.println("data: "+JavaEmbedUtils.javaToRuby(rt, data).
-		
-		Map payload = getPayload();
+		@SuppressWarnings("rawtypes")
+		Map eventData = getPayload();
+//		System.out.println("pay: "+eventData);
 		IRubyObject[] args = new IRubyObject[] {
-				rt.newSymbol("push"), JavaEmbedUtils.javaToRuby(rt, data), JavaEmbedUtils.javaToRuby(rt, payload)
+				rt.newSymbol("push"), JavaEmbedUtils.javaToRuby(rt, data),
+				JavaEmbedUtils.javaToRuby(rt, eventData.get("payload"))
 		};
-		
 		IRubyObject o = rt.getClass("CommitMsgChecker").newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
-//		IRubyObject o = rubyService.getMetaClass().newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
 		
 		String e = (String)JavaEmbedUtils.invokeMethod(rt, o, "event", null, String.class);
 		System.out.println("e: "+e);
-//		JavaEmbedUtils.invokeMethod(rt, o, "receive_push", new Object[]{}, Object.class);
+		JavaEmbedUtils.invokeMethod(rt, o, "receive_push", new Object[]{}, Object.class);
 		
 //		IRubyObject[] a = new IRubyObject[] { rt.newString("hello, world") };
 //		IRubyObject f = rt.getClass("Foo").newInstance(rt.getCurrentContext(), a, Block.NULL_BLOCK);
@@ -72,7 +62,7 @@ public class MyService {
 //		System.out.println("return: "+r.asJavaString());
 	}
 	
-	private Map getConfig() {
+	private Map<String, String> getConfig() {
 		Map<String, String> data = new HashMap<String, String>();
 		data.put("message_format", "'\\[#WEB-\\d{1,5} status:\\d+ resolution:\\d+\\] .*$'");
 		data.put("recipients", "a@b.fi, c@d.fi");
@@ -81,6 +71,7 @@ public class MyService {
 		return data;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Map getPayload() {
 		Reader r = null;
 		try {
@@ -97,6 +88,7 @@ public class MyService {
 	}
 
 	
+	@SuppressWarnings("unused")
 	private IRubyObject getRubyServiceInstance_OBS() {
 		System.out.println("getRubyServiceInstance");
 
