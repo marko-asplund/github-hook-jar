@@ -6,12 +6,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,6 +22,8 @@ import org.jruby.runtime.Block;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import com.google.gson.Gson;
+
+import fi.aspluma.hookjar.ruby.EventDataConverter;
 
 public class MyService {
 	private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7/lib/ruby/1.8";
@@ -45,6 +45,7 @@ public class MyService {
 		scriptFile = "liq_test.rb";
 		rt.executeScript(FileUtils.readFileToString(new File(scriptFile)), scriptFile);
 		System.out.println("cl: "+rt.getClass("CommitMsgChecker"));
+		
 	}
 
 	public void processRequest(Map<String, String> requestParameters) {
@@ -52,12 +53,14 @@ public class MyService {
 		Map<String, String> data = getConfig();
 		@SuppressWarnings("rawtypes")
 		Map eventData = getPayload();
-		@SuppressWarnings("unchecked")
+		EventDataConverter c = new EventDataConverter(rt);
+		
 		IRubyObject[] args = new IRubyObject[] {
 				rt.newSymbol("push"), JavaEmbedUtils.javaToRuby(rt, data),
-				deepConvert((Map<String, Object>)eventData.get("payload"))
+				c.deepConvert(eventData.get("payload"))
 		};
 		
+		@SuppressWarnings("unused")
 		RubyClass rb = args[2].getType();
 		
 		IRubyObject o = rt.getClass("CommitMsgChecker").newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
@@ -78,39 +81,7 @@ public class MyService {
 //		IRubyObject r = rubyService.callMethod(rt.getCurrentContext(), "receive_push");
 //		System.out.println("return: "+r.asJavaString());
 	}
-	
-	@SuppressWarnings("unchecked")
-	private IRubyObject deepConvert(Map<String, Object> o) {
-		if(false)
-			return JavaEmbedUtils.javaToRuby(rt, o);
 
-		RubyHash h = RubyHash.newHash(rt);
-		
-		for(Iterator<String> i = o.keySet().iterator(); i.hasNext();)  {
-			String k = i.next();
-			Object v = null;
-			if(o.get(k) instanceof java.util.LinkedHashMap) {
-				v = deepConvert((Map<String, Object>)o.get(k));
-			} else if (o.get(k) instanceof ArrayList) {
-				RubyArray ra = RubyArray.newArray(rt);
-				List<Object> l = (List)o.get(k);
-				for(Object lo : l) {
-					Object ao = null;
-					if(lo instanceof java.util.LinkedHashMap)
-						ao = deepConvert((Map<String, Object>)lo);
-					else
-						ao = lo;
-					ra.add(ao);
-				}
-				v = ra;
-			} else {
-				v = o.get(k);
-			}
-			h.put(k, v);
-		}
-		return h;
-	}
-	
 	private Map<String, String> getConfig() {
 		Map<String, String> data = new HashMap<String, String>();
 		data.put("message_format", "'\\[#WEB-\\d{1,5} status:\\d+ resolution:\\d+\\] .*$'");
