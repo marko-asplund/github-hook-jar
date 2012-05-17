@@ -4,19 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jruby.Ruby;
-import org.jruby.RubyArray;
 import org.jruby.RubyClass;
-import org.jruby.RubyHash;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -33,19 +28,16 @@ public class MyService {
 	
 	public void initialize() throws IOException {
 		String[] paths = new String[] {
-				RUBY_HOME, GS+"/lib", GS+"/services", GEMS+"/liquid-2.3.0/lib", GEMS+"/activesupport-3.0.10/lib",
+				RUBY_HOME, ".", GS+"/lib", GS+"/services", GEMS+"/liquid-2.3.0/lib", GEMS+"/activesupport-3.0.10/lib",
 				GEMS+"/i18n-0.5.0/lib", GEMS+"/mail-2.3.0/lib", GEMS+"/mime-types-1.18/lib", GEMS+"/treetop-1.4.10/lib",
 				GEMS+"/addressable-2.2.7/lib", GEMS+"/faraday-0.7.6/lib", GEMS+"/rack-1.4.1/lib", GEMS+"/tinder-1.7.0/lib",
 				GEMS+"/faraday_middleware-0.8.7/lib", GEMS+"/xmpp4r-0.5/lib"
 		};
-//		System.out.println("paths: "+Arrays.asList(paths));
 		rt = JavaEmbedUtils.initialize(Arrays.asList(paths));
 		
 		String scriptFile = "service-boot.rb";
-		scriptFile = "liq_test.rb";
-		rt.executeScript(FileUtils.readFileToString(new File(scriptFile)), scriptFile);
-		System.out.println("cl: "+rt.getClass("CommitMsgChecker"));
-		
+		String script = FileUtils.readFileToString(new File(scriptFile));
+		rt.executeScript(script, scriptFile);
 	}
 
 	public void processRequest(Map<String, String> requestParameters) {
@@ -56,14 +48,12 @@ public class MyService {
 		EventDataConverter c = new EventDataConverter(rt);
 		
 		IRubyObject[] args = new IRubyObject[] {
-				rt.newSymbol("push"), JavaEmbedUtils.javaToRuby(rt, data),
+				rt.newSymbol("push"),
+				JavaEmbedUtils.javaToRuby(rt, data),
 				c.deepConvert(eventData.get("payload"))
 		};
 		
-		@SuppressWarnings("unused")
-		RubyClass rb = args[2].getType();
-		
-		IRubyObject o = rt.getClass("CommitMsgChecker").newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
+		IRubyObject o = getRubyClass(rt, "Service::CommitMsgChecker").newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
 		
 		// set smtp etc. parameters
 //		o.callMethod(rt.getCurrentContext(), "smtp_address=", rt.newString("abc"));
@@ -73,13 +63,6 @@ public class MyService {
 		String e = (String)JavaEmbedUtils.invokeMethod(rt, o, "event", null, String.class);
 		System.out.println("e: "+e);
 		JavaEmbedUtils.invokeMethod(rt, o, "receive_push", new Object[]{}, Object.class);
-		
-//		IRubyObject[] a = new IRubyObject[] { rt.newString("hello, world") };
-//		IRubyObject f = rt.getClass("Foo").newInstance(rt.getCurrentContext(), a, Block.NULL_BLOCK);
-//		System.out.println("greet: "+JavaEmbedUtils.invokeMethod(rt, f, "greet", new Object[]{}, String.class));
-
-//		IRubyObject r = rubyService.callMethod(rt.getCurrentContext(), "receive_push");
-//		System.out.println("return: "+r.asJavaString());
 	}
 
 	private Map<String, String> getConfig() {
@@ -95,7 +78,7 @@ public class MyService {
 	private Map getPayload() {
 		Reader r = null;
 		try {
-			r = new FileReader(new File("github-services/docs/github_payload"));
+			r = new FileReader(new File("github-services.dir/docs/github_payload"));
 			Gson g = new Gson();
 			Map data = g.fromJson(r, Map.class);
 			return data;
@@ -105,6 +88,17 @@ public class MyService {
 				IOUtils.closeQuietly(r);
 		}
 		return null;
+	}
+
+
+	private static RubyClass getRubyClass(Ruby rt, String clazz) {
+		String[] comps = clazz.split("::");
+		RubyClass rc = rt.getClass(comps[0]);
+		if(comps.length == 1)
+			return rc;
+		for(int i = 1; i<comps.length; i++)
+			rc = rc.getClass(comps[i]);
+		return rc;
 	}
 
 	
