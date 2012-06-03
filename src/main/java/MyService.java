@@ -4,14 +4,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jruby.Ruby;
 import org.jruby.RubyClass;
+import org.jruby.RubyHash;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -21,23 +22,22 @@ import com.google.gson.Gson;
 import fi.aspluma.hookjar.ruby.EventDataConverter;
 
 public class MyService {
-	private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7/lib/ruby/1.8";
-	private static final String GS = "github-services";
-	private static final String GEMS = "github-services/vendor/gems/ruby/1.8/gems";
+	private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
 	private static Ruby rt;
 	
 	public void initialize() throws IOException {
 		String[] paths = new String[] {
-				RUBY_HOME, ".", GS+"/lib", GS+"/services", GEMS+"/liquid-2.3.0/lib", GEMS+"/activesupport-3.0.10/lib",
-				GEMS+"/i18n-0.5.0/lib", GEMS+"/mail-2.3.0/lib", GEMS+"/mime-types-1.18/lib", GEMS+"/treetop-1.4.10/lib",
-				GEMS+"/addressable-2.2.7/lib", GEMS+"/faraday-0.7.6/lib", GEMS+"/rack-1.4.1/lib", GEMS+"/tinder-1.7.0/lib",
-				GEMS+"/faraday_middleware-0.8.7/lib", GEMS+"/xmpp4r-0.5/lib"
+				".", "lib", "/services", RUBY_HOME+"/lib/ruby/1.8"
 		};
-		rt = JavaEmbedUtils.initialize(Arrays.asList(paths));
+		List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
+		for(String p : paths)
+			loadPaths.add(0, p);
+		rt = JavaEmbedUtils.initialize(loadPaths);
 		
 		String scriptFile = "service-boot.rb";
 		String script = FileUtils.readFileToString(new File(scriptFile));
 		rt.executeScript(script, scriptFile);
+		System.out.println("initialize done");
 	}
 
 	public void processRequest(Map<String, String> requestParameters) {
@@ -46,6 +46,7 @@ public class MyService {
 		@SuppressWarnings("rawtypes")
 		Map eventData = getPayload();
 		EventDataConverter c = new EventDataConverter(rt);
+		System.out.println("eventData: "+eventData);
 		
 		IRubyObject[] args = new IRubyObject[] {
 				rt.newSymbol("push"),
@@ -56,9 +57,13 @@ public class MyService {
 		IRubyObject o = getRubyClass(rt, "Service::CommitMsgChecker").newInstance(rt.getCurrentContext(), args, Block.NULL_BLOCK);
 		
 		// set smtp etc. parameters
-//		o.callMethod(rt.getCurrentContext(), "smtp_address=", rt.newString("abc"));
+		
 		System.out.println("vars: "+o.getInstanceVariables().getInstanceVariableNameList());
-//		JavaEmbedUtils.newObjectAdapter().setInstanceVariable(o, "smtp_address", rt.newString("abc"));
+//		o.callMethod(rt.getCurrentContext(), "@smtp_address", new IRubyObject[]{rt.newString("abc") });
+		RubyHash emailConf = (RubyHash) o.callMethod(rt.getCurrentContext(), "email_config");
+		emailConf.put("address", "localhost");
+		System.out.println("keys: "+emailConf.keySet());
+		System.out.println(o.callMethod(rt.getCurrentContext(), "smtp_address"));
 		
 		String e = (String)JavaEmbedUtils.invokeMethod(rt, o, "event", null, String.class);
 		System.out.println("e: "+e);
@@ -78,11 +83,12 @@ public class MyService {
 	private Map getPayload() {
 		Reader r = null;
 		try {
-			r = new FileReader(new File("github-services.dir/docs/github_payload"));
+			r = new FileReader(new File("github-services/docs/github_payload"));
 			Gson g = new Gson();
 			Map data = g.fromJson(r, Map.class);
 			return data;
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		} finally {
 			if(r!=null)
 				IOUtils.closeQuietly(r);
