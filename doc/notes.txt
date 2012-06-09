@@ -1,0 +1,90 @@
+
+TODO
+- ruby lib path
+- packaging
+- jruby usage patterns (thread-safety etc.)
+- ruby dynamic service requires 
+- configuration
+- proxy/factory exceptions
+- run in webapp, WAR packaging
+- allow using exploded github-services-code
+- split code base into project + modules
+- create java service
+- create groovy service (low)
+- UI (low)
+
+QUESTIONS
+- github-services
+	packaging: exploded? jar?
+	load path
+	config? email etc.?
+	myapp.rb
+
+
+DONE
+- run from JRuby
+- Sinatra takes over: OK
+  how to disable sinatra? redefine Service::App
+- load path issue: OK
+
+=======================================================
+
+/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
+
+* json GEM causes conflict
+
+
+git clone https://github.com/github/github-services.git
+cd github-services
+bundle install
+
+
+java -Djrxuby.debug.loadService=true -cp target/classes:../jruby-1.6.7/lib/jruby.jar:$HOME/.m2/repository/commons-io/commons-io/2.3/commons-io-2.3.jar:$HOME/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:$HOME/.m2/repository/org/yaml/snakeyaml/1.10/snakeyaml-1.10.jar:github-services.jar MyService
+
+
+mv github-services.dir github-services; jar cvf github-services.jar github-services; mv github-services github-services.dir
+
+
+
+=======================================================
+
+cd /Users/aspluma/projects/koku/dev/kohtikumppanuutta
+G=github-services/vendor/gems/ruby/1.8/gems
+H=github-services
+R=/Users/aspluma/.rvm/rubies/ree-1.8.7-2012.02//lib/ruby/1.8
+
+export LP=$H:$G/liquid-2.3.0/lib:$H/lib:$G/addressable-2.2.7/lib:$G/faraday-0.7.6/lib:$G/rack-1.4.1/lib:$R:$G/sinatra-1.2.6/lib:\
+$G/tilt-1.2.2/lib:$G/tinder-1.7.0/lib:$G/activesupport-3.0.10/lib:$G/faraday_middleware-0.8.7/lib:$G/xmpp4r-0.5/lib:\
+$G/i18n-0.5.0/lib:$G/mail-2.3.0/lib:$G/mime-types-1.18/lib:$G/treetop-1.4.10/lib
+
+ruby -I$LP  github-services/tst.rb
+
+=======================================================
+
+cd /Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
+
+mvn exec:java -Dexec.mainClass=ServiceRunner
+
+
+=======================================================
+
+global config
+	service config (e.g. email config)
+repository
+	repository URL context
+	0-n ServiceHook
+		Java/Ruby/...
+		HookClass
+		HookParameters
+		active/inactive
+
+=======================================================
+
+git clone git@github.com:marko-asplund/github-services.git
+cd github-services
+# NB: unset RVM environment!!
+rvm reset
+jruby -S gem install bundler
+jruby -S script/bootstrap
+
+
