@@ -24,9 +24,11 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private Ruby ruby;
 	
 	public RubyServiceProxyFactory(String rubyHome) throws IOException {
+	  // add github-services and Ruby libs to load path
 		String[] paths = new String[] {
-				".", "lib", "/services", rubyHome+"/lib/ruby/1.8"
+				"lib", "/services", rubyHome+"/lib/ruby/1.8"
 		};
+		// add Ruby gems used by github-services to load path
 		List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
 		for(String p : paths)
 			loadPaths.add(0, p);
@@ -50,8 +52,8 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 				c.deepConvert(eventData.get("payload"))
 		};
 		
-		IRubyObject service = getRubyClass(ruby, "Service::CommitMsgChecker").newInstance(ruby.getCurrentContext(), args, Block.NULL_BLOCK);
-		return new RubyServiceProxy(ruby, service);
+		IRubyObject service = getRubyClass(ruby, serviceName).newInstance(ruby.getCurrentContext(), args, Block.NULL_BLOCK);
+		return new RubyServiceProxy(service);
 	}
 
 	private static RubyClass getRubyClass(Ruby rt, String clazz) {
