@@ -17,10 +17,11 @@ import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
 
 public class ServiceRunner {
   private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
+  private static final String GITHUB_SERVICES_HOME = "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
 
   public static void main(String[] args) throws IOException {
 
-    ServiceProxyFactory f = new RubyServiceProxyFactory(RUBY_HOME);
+    ServiceProxyFactory f = new RubyServiceProxyFactory(RUBY_HOME, GITHUB_SERVICES_HOME);
     ServiceProxy srv = f.createServiceProxy("Service::CommitMsgChecker", getConfig(), getPayload());
     srv.configure();
     srv.processRequest();

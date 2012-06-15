@@ -1,14 +1,15 @@
 
 TODO
+- switch to using exploded github-services code base
+- jruby usage patterns (thread-safety etc.)
 - ruby lib path
 - packaging
-- jruby usage patterns (thread-safety etc.)
 - ruby dynamic service requires 
 - configuration
 - proxy/factory exceptions
 - run in webapp, WAR packaging
-- allow using exploded github-services-code
-- split code base into project + modules
+- create dispatcher servlet
+- split code base into project + modules?
 - create java service
 - create groovy service (low)
 - UI (low)

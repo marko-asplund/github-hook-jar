@@ -3,15 +3,14 @@ package fi.aspluma.hookjar.ruby;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.jruby.Ruby;
-import org.jruby.RubyClass;
-import org.jruby.javasupport.JavaEmbedUtils;
-import org.jruby.runtime.Block;
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,23 +20,29 @@ import fi.aspluma.hookjar.ServiceProxyFactory;
 
 public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static Logger logger = LoggerFactory.getLogger(RubyServiceProxyFactory.class);
-	private Ruby ruby;
+	private ScriptingContainer ruby;
 	
-	public RubyServiceProxyFactory(String rubyHome) throws IOException {
+	public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
 	  // add github-services and Ruby libs to load path
 		String[] paths = new String[] {
-				"lib", "/services", rubyHome+"/lib/ruby/1.8"
+		    githubServicesHome+"/lib", githubServicesHome, rubyHome+"/lib/ruby/1.8"
 		};
 		// add Ruby gems used by github-services to load path
-		List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
-		for(String p : paths)
-			loadPaths.add(0, p);
-		ruby = JavaEmbedUtils.initialize(loadPaths);
+//    List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
+		List<String> loadPaths = new ArrayList<String>();
+		List<String> gemPaths = FileUtils.readLines(new File(githubServicesHome+"/.bundle/loadpath"));
+		for(String p : gemPaths)
+			loadPaths.add(githubServicesHome+"/"+p);
+		loadPaths.addAll(0, Arrays.asList(paths));
+		logger.debug("lp: "+loadPaths);
+		
+		ruby = new ScriptingContainer(LocalContextScope.CONCURRENT);
+		ruby.setLoadPaths(loadPaths);
 
 		String scriptFile = "service-boot.rb";
 		URL file = this.getClass().getClassLoader().getResource(scriptFile);
 		String script = FileUtils.readFileToString(new File(file.getFile()));
-		ruby.executeScript(script, scriptFile);
+		ruby.runScriptlet(script);
 		logger.debug("Factory initialized");
 	}
 	
@@ -46,24 +51,16 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 		EventDataConverter c = new EventDataConverter(ruby);
 		logger.debug("eventData: "+eventData);
 		
-		IRubyObject[] args = new IRubyObject[] {
-				ruby.newSymbol("push"),
-				JavaEmbedUtils.javaToRuby(ruby, config),
+		Object[] args = new Object[] {
+				ruby.runScriptlet(":push"),
+				config,
 				c.deepConvert(eventData.get("payload"))
 		};
 		
-		IRubyObject service = getRubyClass(ruby, serviceName).newInstance(ruby.getCurrentContext(), args, Block.NULL_BLOCK);
+		Object srv = ruby.runScriptlet(serviceName);
+		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);
+		
 		return new RubyServiceProxy(service);
-	}
-
-	private static RubyClass getRubyClass(Ruby rt, String clazz) {
-		String[] comps = clazz.split("::");
-		RubyClass rc = rt.getClass(comps[0]);
-		if(comps.length == 1)
-			return rc;
-		for(int i = 1; i<comps.length; i++)
-			rc = rc.getClass(comps[i]);
-		return rc;
 	}
 
 }
