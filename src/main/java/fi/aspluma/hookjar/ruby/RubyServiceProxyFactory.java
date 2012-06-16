@@ -79,7 +79,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 		Object srv = ruby.runScriptlet(serviceName);
 		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);
 		
-		return new RubyServiceProxy(service);
+		return new RubyServiceProxy(ruby, service);
 	}
 
 }

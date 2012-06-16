@@ -10,12 +10,16 @@ import org.jruby.RubyArray;
 import org.jruby.RubyHash;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.builtin.IRubyObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.TypeConverter;
 
 public class EventDataConverter {
 	private Map<Class<?>, TypeConverter<? extends IRubyObject>> converters = new HashMap<Class<?>, TypeConverter<? extends IRubyObject>>();
 	private ScriptingContainer ruby;
+	@SuppressWarnings("unused")
+  private static Logger logger = LoggerFactory.getLogger(EventDataConverter.class);
 
 	public EventDataConverter(ScriptingContainer ruby) {
 		this.ruby = ruby;
