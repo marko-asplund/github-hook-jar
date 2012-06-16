@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -23,19 +24,12 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private ScriptingContainer ruby;
 	
 	public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
-	  // add github-services and Ruby libs to load path
-		String[] paths = new String[] {
-		    githubServicesHome+"/lib", githubServicesHome, rubyHome+"/lib/ruby/1.8"
-		};
-		// add Ruby gems used by github-services to load path
-//    List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
-		List<String> loadPaths = new ArrayList<String>();
-		List<String> gemPaths = FileUtils.readLines(new File(githubServicesHome+"/.bundle/loadpath"));
-		for(String p : gemPaths)
-			loadPaths.add(githubServicesHome+"/"+p);
-		loadPaths.addAll(0, Arrays.asList(paths));
-		logger.debug("lp: "+loadPaths);
 		
+	  List<String> loadPaths = null;
+	  if(githubServicesHome == null)
+      loadPaths = getUnExplodedLoadPaths(rubyHome);
+	  else
+      loadPaths = getExplodedLoadPaths(rubyHome, githubServicesHome);
 		ruby = new ScriptingContainer(LocalContextScope.CONCURRENT);
 		ruby.setLoadPaths(loadPaths);
 
@@ -44,6 +38,31 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 		String script = FileUtils.readFileToString(new File(file.getFile()));
 		ruby.runScriptlet(script);
 		logger.debug("Factory initialized");
+	}
+
+	private List<String> getUnExplodedLoadPaths(String rubyHome) throws IOException {
+    // add github-services and Ruby libs to load path
+    String[] paths = new String[] {
+        "lib", rubyHome+"/lib/ruby/1.8"
+    };
+    // add Ruby gems used by github-services to load path
+    List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
+    loadPaths.addAll(0, Arrays.asList(paths));
+    return loadPaths;
+	}
+	
+	private List<String> getExplodedLoadPaths(String rubyHome, String githubServicesHome) throws IOException {
+    // add github-services and Ruby libs to load path
+    String[] paths = new String[] {
+        githubServicesHome+"/lib", githubServicesHome, rubyHome+"/lib/ruby/1.8"
+    };
+    // add Ruby gems used by github-services to load path
+    List<String> loadPaths = new ArrayList<String>();
+    List<String> gemPaths = FileUtils.readLines(new File(githubServicesHome+"/.bundle/loadpath"));
+    for(String p : gemPaths)
+      loadPaths.add(githubServicesHome+"/"+p);
+    loadPaths.addAll(0, Arrays.asList(paths));
+    return loadPaths;
 	}
 	
 	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, Map<String, ?> eventData) {
