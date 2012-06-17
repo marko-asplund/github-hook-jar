@@ -66,8 +66,14 @@ cd /Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
 
 mvn exec:java -Dexec.mainClass=ServiceRunner
 
+cd /Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1
+curl -D - --data-binary @docs/payload_data http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
+
 
 =======================================================
+
+assumptions
+* multiple repositories related to the same project may use the same config
 
 global config
 	service config (e.g. email config)
@@ -78,6 +84,13 @@ repository
 		HookClass
 		HookParameters
 		active/inactive
+
+
+eventhandler /
+handlerchain
+handler
+
+
 
 =======================================================
 

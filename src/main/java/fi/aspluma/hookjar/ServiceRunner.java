@@ -11,8 +11,6 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 
-import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
-
 
 public class ServiceRunner {
   public static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
@@ -20,10 +18,10 @@ public class ServiceRunner {
 
   public static void main(String[] args) throws IOException {
 
-    ServiceProxyFactory f = new RubyServiceProxyFactory(RUBY_HOME, GITHUB_SERVICES_HOME);
-    ServiceProxy srv = f.createServiceProxy("Service::CommitMsgChecker", getConfig(), getPayload());
-    srv.configure();
-    srv.processRequest();
+//    ServiceProxyFactory f = new RubyServiceProxyFactory(RUBY_HOME, GITHUB_SERVICES_HOME);
+//    ServiceProxy srv = f.createServiceProxy("Service::CommitMsgChecker", getConfig(), getPayload());
+//    srv.configure();
+//    srv.processRequest();
   }
 
   public static Map<String, String> getConfig() {

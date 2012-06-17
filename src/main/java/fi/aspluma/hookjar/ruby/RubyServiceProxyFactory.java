@@ -65,17 +65,14 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
     return loadPaths;
 	}
 	
-	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, Map<String, ?> eventData) {
+	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] eventData) {
 		// instantiate service
-		EventDataConverter c = new EventDataConverter(ruby);
-		logger.debug("eventData: "+eventData);
+    Object jsonClass = ruby.runScriptlet("JSON");
+    IRubyObject input = ruby.callMethod(jsonClass, "parse", new String(eventData), IRubyObject.class);
 		
 		Object[] args = new Object[] {
-				ruby.runScriptlet(":push"),
-				config,
-				c.deepConvert(eventData.get("payload"))
+				ruby.runScriptlet(":push"), config, input
 		};
-		
 		Object srv = ruby.runScriptlet(serviceName);
 		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);
 		
