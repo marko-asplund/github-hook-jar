@@ -1,3 +1,4 @@
+package fi.aspluma.hookjar;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,14 +11,12 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 
-import fi.aspluma.hookjar.ServiceProxy;
-import fi.aspluma.hookjar.ServiceProxyFactory;
 import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
 
 
 public class ServiceRunner {
-  private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
-  private static final String GITHUB_SERVICES_HOME = "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
+  public static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
+  public static final String GITHUB_SERVICES_HOME = "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
 
   public static void main(String[] args) throws IOException {
 
@@ -27,7 +26,7 @@ public class ServiceRunner {
     srv.processRequest();
   }
 
-  private static Map<String, String> getConfig() {
+  public static Map<String, String> getConfig() {
     Map<String, String> data = new HashMap<String, String>();
     data.put("message_format", "'\\[#WEB-\\d{1,5} status:\\d+ resolution:\\d+\\] .*$'");
     data.put("recipients", "a@b.fi, c@d.fi");
@@ -36,10 +35,10 @@ public class ServiceRunner {
     return data;
   }
 
-  private static Map<String, ?> getPayload() {
+  public static Map<String, ?> getPayload() {
     Reader r = null;
     try {
-      r = new FileReader(new File("github-services-1/docs/github_payload"));
+      r = new FileReader(new File(GITHUB_SERVICES_HOME+"/docs/github_payload"));
       Gson g = new Gson();
       @SuppressWarnings("unchecked")
       Map<String, ?> data = g.fromJson(r, Map.class);
