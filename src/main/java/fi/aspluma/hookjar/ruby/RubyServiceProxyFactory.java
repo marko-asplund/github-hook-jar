@@ -23,6 +23,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static Logger logger = LoggerFactory.getLogger(RubyServiceProxyFactory.class);
 	private ScriptingContainer ruby;
 	
+	// TODO: make this class a singleton
 	public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
 		
 	  List<String> loadPaths = null;
@@ -33,9 +34,14 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 		ruby = new ScriptingContainer(LocalContextScope.CONCURRENT);
 		ruby.setLoadPaths(loadPaths);
 
+		// include some required gems
 		String scriptFile = "service-boot.rb";
 		URL file = this.getClass().getClassLoader().getResource(scriptFile);
 		String script = FileUtils.readFileToString(new File(file.getFile()));
+		
+		// include all github services
+		script += FileUtils.readFileToString(new File(githubServicesHome+"/requires.rb"));
+		
 		ruby.runScriptlet(script);
 		logger.debug("Factory initialized");
 	}
@@ -67,6 +73,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	
 	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] eventData) {
 		// instantiate service
+	  // FIXME
     Object jsonClass = ruby.runScriptlet("JSON");
     IRubyObject input = ruby.callMethod(jsonClass, "parse", new String(eventData), IRubyObject.class);
 		

@@ -1,14 +1,22 @@
 
+
 TODO
-- switch to using exploded github-services code base
-- jruby usage patterns (thread-safety etc.)
-- ruby lib path
-- packaging
-- ruby dynamic service requires 
+- input data parsing
+- ruby dynamic service requires
+  service-boot.rb:
+  require "services/email"
+  a) load dynamically
+  b) load all available services statically at init
+- verify jruby usage patterns
+  esp. thread-safety etc.
+
 - configuration
+  + per service configuration / initialization inheritance
+    e.g. service ==> ruby service ==> specific service
+  + how to implement configuration dynamically?
+  + github vs. ruby service
+  + command pattern
 - proxy/factory exceptions
-- run in webapp, WAR packaging
-- create dispatcher servlet
 - split code base into project + modules?
 - create java service
 - create groovy service (low)
@@ -23,6 +31,17 @@ QUESTIONS
 
 
 DONE
+- verify service-boot.rb + requires.rb
+- fix Service::Jira (openssl) issue
+  install jruby-openssl + modify .bundle/loadpath: OK
+  test with clean github-services installation
+- Service::Email
+- allow to run test code outside servlet container
+- switch to using exploded github-services code base
+- ruby lib path
+- run in webapp, WAR packaging
+- packaging
+- create dispatcher servlet
 - run from JRuby
 - Sinatra takes over: OK
   how to disable sinatra? redefine Service::App
@@ -101,4 +120,12 @@ rvm reset
 jruby -S gem install bundler
 jruby -S script/bootstrap
 
+
+jruby -S bundle install --path=vendor/gems jruby-openssl
+
+jruby -S gem install -i vendor/gems/jruby/1.8 jruby-openssl
+
+
+
+jruby -Ivendor/gems/jruby/1.8/gems/bouncy-castle-java-1.5.0146.1/lib -Ivendor/gems/jruby/1.8/gems/jruby-openssl-0.7.7/lib/shared o1.rb
 

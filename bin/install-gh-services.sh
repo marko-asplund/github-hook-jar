@@ -16,5 +16,11 @@ jruby -S script/bootstrap
 jruby -S gem install -i vendor/gems/jruby/1.8 jruby-openssl
 
 # add jruby-openssl to jruby LOAD_PATH
-(echo; find vendor/gems -regex .*/jruby-openssl.*/lib/shared -type d ) >> .bundle/loadpath
-find vendor/gems -regex .*/bouncy-castle-java.*/lib -type d >> .bundle/loadpath
+echo >> .bundle/loadpath
+find vendor/gems -regex .*/jruby-openssl.*/lib/shared -type d >> .bundle/loadpath
+find vendor/gems -regex .*/bouncy-castle-java.*/lib   -type d >> .bundle/loadpath
+
+rm -f requires.rb
+for i in `ls services/*.rb`; do
+  echo "require '$i'" >> requires.rb
+done

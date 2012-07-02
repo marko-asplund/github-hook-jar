@@ -26,10 +26,10 @@ public class RubyServiceProxy implements ServiceProxy {
     RubyHash emailConf = ruby.callMethod(service,"email_config", RubyHash.class);
     emailConf.put("address", "localhost");
     logger.debug("keys: "+emailConf.keySet());
-    logger.debug(ruby.callMethod(service,"smtp_address", String.class));
 	}
 	
   public void processRequest() {
+    logger.debug("processRequest: "+service);
     ruby.callMethod(service, "receive_push", Object.class);
 	}
 

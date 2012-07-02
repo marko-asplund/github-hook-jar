@@ -17,7 +17,10 @@ import fi.aspluma.hookjar.EventDispatcher;
 
 public class ServiceRunner {
   public static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
-  public static final String GITHUB_SERVICES_HOME = "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
+  public static final String GITHUB_SERVICES_HOME = 
+      "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/tmp/github-services";
+//    "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
+
 
   public static void main(String[] args) throws IOException {
     EventDispatcher d = new EventDispatcher();
