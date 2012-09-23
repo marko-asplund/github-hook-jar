@@ -1,4 +1,11 @@
 
+TODO / 2012-09
+- re-test gh-services and JRuby
+- requires and tweaks
+- review architecture
+- refactor architecture
+- publish on GitHub
+
 
 TODO
 - input data parsing
@@ -109,22 +116,18 @@ eventhandler /
 handlerchain
 handler
 
-
-
 =======================================================
 
-git clone git@github.com:marko-asplund/github-services.git
-cd github-services
-# NB: unset RVM environment!!
-rvm reset
-jruby -S gem install bundler
-jruby -S script/bootstrap
 
+# testing
+cd /home/aspluma/projects/personal/github-services
+curl -X POST --data-binary @payload1.json -D - http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
 
-jruby -S bundle install --path=vendor/gems jruby-openssl
+http://requestb.in/
 
-jruby -S gem install -i vendor/gems/jruby/1.8 jruby-openssl
+http://requestb.in/ulu05dul
 
+=======================================================
 
 
 jruby -Ivendor/gems/jruby/1.8/gems/bouncy-castle-java-1.5.0146.1/lib -Ivendor/gems/jruby/1.8/gems/jruby-openssl-0.7.7/lib/shared o1.rb

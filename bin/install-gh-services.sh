@@ -1,9 +1,16 @@
 #!/bin/sh
 
-git clone git@github.com:marko-asplund/github-services.git
-cd github-services
+SERVICES_REPO=https://github.com/marko-asplund/github-services.git
+#SERVICES_REPO=git@github.com:marko-asplund/github-services.git
 
-# unset RVM environment settings
+git clone $SERVICES_REPO
+if [ ! -d "github-services" ]; then
+  echo "github-services does not exist, aborting"
+  exit 1
+fi
+cd github-services 
+
+# unset RVM environment settings, if using RVM.
 rvm reset
 
 # install Bundler

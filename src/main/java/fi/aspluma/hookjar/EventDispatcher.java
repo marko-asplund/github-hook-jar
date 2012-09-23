@@ -10,12 +10,7 @@ import org.slf4j.LoggerFactory;
 import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
 
 public class EventDispatcher {
-  @SuppressWarnings("unused")
   private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
-  private static final String RUBY_HOME = "/Users/aspluma/projects/personal/git-commit-policy/jruby-1.6.7.2";
-  private static final String GITHUB_SERVICES_HOME =
-      "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/tmp/github-services";
-//      "/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1";
 
   private Map<String, HandlerChain> chains = new HashMap<String, HandlerChain>();
   private Map<HandlerType, ServiceProxyFactory> factories = new HashMap<HandlerType, ServiceProxyFactory>();
@@ -36,7 +31,14 @@ public class EventDispatcher {
   }
   
   private void initialize() throws IOException {
-    factories.put(HandlerType.RUBY, new RubyServiceProxyFactory(RUBY_HOME, GITHUB_SERVICES_HOME));
+	  String rubyHome = System.getProperty("ghj.ruby.home");
+	  String githubServicesHome = System.getProperty("ghj.github-services.home");
+	  
+	  if(rubyHome == null || githubServicesHome == null) {
+	    throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
+	  }
+    
+    factories.put(HandlerType.RUBY, new RubyServiceProxyFactory(rubyHome, githubServicesHome));
     // TODO: add other factories here
     
     HandlerChain hc1 = new HandlerChain("/foo");
@@ -48,6 +50,7 @@ public class EventDispatcher {
     
     h = new Handler(HandlerType.RUBY, "Service::Jira");
     h.addParameter("server_url", "http://localhost:5050/foobar");
+    h.addParameter("api_version", "123");
     h.addParameter("username", "myuser");
     h.addParameter("password", "mypwd");
     hc1.addHandler(h);
