@@ -49,7 +49,7 @@ public class EventDispatcher {
     hc1.addHandler(h);
     
     h = new Handler(HandlerType.RUBY, "Service::Jira");
-    h.addParameter("server_url", "http://localhost:5050/foobar");
+    h.addParameter("server_url", "http://127.0.0.1:5050/foobar");
     h.addParameter("api_version", "123");
     h.addParameter("username", "myuser");
     h.addParameter("password", "mypwd");
