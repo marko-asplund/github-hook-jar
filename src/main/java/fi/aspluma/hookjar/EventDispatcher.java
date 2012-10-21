@@ -7,63 +7,54 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
+import fi.aspluma.hookjar.config.StaticJavaConfiguration;
+import fi.aspluma.hookjar.java.JavaServiceProxyFactory;
 import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
 
 public class EventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
 
   private Map<String, HandlerChain> chains = new HashMap<String, HandlerChain>();
-  private Map<HandlerType, ServiceProxyFactory> factories = new HashMap<HandlerType, ServiceProxyFactory>();
+  private Map<HandlerType, ServiceProxyFactory> factories;
   
   public EventDispatcher() throws IOException {
     initialize();
   }
 
-  public void dispatch(String requestURI, byte[] input) {
-    HandlerChain chain = chains.get(requestURI);
+  public void dispatch(String requestURI, byte[] eventData) {
+    Map<?, ?> data = new Gson().fromJson(new String(eventData), Map.class);
+    logger.debug("parsing input data with Gson lib: "+data);
+    
+    HandlerChain chain = chains.get(requestURI);  // NB: exact match
     for(Handler h : chain.getHandlers()) {
       logger.debug("invoking handler: "+h);
       ServiceProxyFactory sf = factories.get(h.getType());
-      ServiceProxy srv = sf.createServiceProxy(h.getClassName(), h.getParameters(), input);
+      ServiceProxy srv = sf.createServiceProxy(h.getClassName(), h.getParameters(), data);
       srv.configure();
       srv.processRequest();
     }
   }
   
   private void initialize() throws IOException {
-	  String rubyHome = System.getProperty("ghj.ruby.home");
-	  String githubServicesHome = System.getProperty("ghj.github-services.home");
-	  
-	  if(rubyHome == null || githubServicesHome == null) {
-	    throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
-	  }
-    
-    factories.put(HandlerType.RUBY, new RubyServiceProxyFactory(rubyHome, githubServicesHome));
-    // TODO: add other factories here
-    
-    HandlerChain hc1 = new HandlerChain("/foo");
-    Handler h = new Handler(HandlerType.RUBY, "Service::CommitMsgChecker");
-    h.addParameter("message_format", "'\\[#WEB-\\d{1,5} status:\\d+ resolution:\\d+\\] .*$'");
-    h.addParameter("recipients", "a@b.fi, c@d.fi");
-    h.addParameter("subject", "foobar");
-    hc1.addHandler(h);
-    
-    h = new Handler(HandlerType.RUBY, "Service::Jira");
-    h.addParameter("server_url", "http://127.0.0.1:5050/foobar");
-    h.addParameter("api_version", "123");
-    h.addParameter("username", "myuser");
-    h.addParameter("password", "mypwd");
-    hc1.addHandler(h);
-    
-//    h = new Handler(HandlerType.RUBY, "Service::Email");
-//    h.addParameter("address", "a@b.fi c@d.fi");
-//    hc1.addHandler(h);
-    
-    
-    chains.put(hc1.getUrl(), hc1);
-    // TODO: add other handlers
-    
-    // TODO: add other chains
+	  factories = getServiceProxyFactories();
+	  chains = new StaticJavaConfiguration().getConfiguredHandlerChains();
   }
+  
+  private Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() throws IOException {
+    String rubyHome = System.getProperty("ghj.ruby.home");
+    String githubServicesHome = System.getProperty("ghj.github-services.home");
+    
+    if(rubyHome == null || githubServicesHome == null) {
+      throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
+    }
+    
+    Map<HandlerType, ServiceProxyFactory> f = new HashMap<HandlerType, ServiceProxyFactory>();
+    f.put(HandlerType.RUBY, new RubyServiceProxyFactory(rubyHome, githubServicesHome));
+    f.put(HandlerType.JAVA, new JavaServiceProxyFactory());
+    return f;
+  }
+  
 
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.jruby.CompatVersion;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
@@ -19,13 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
-import org.apache.commons.lang3.time.StopWatch;
-
-import com.google.gson.Gson;
 
 
 public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static Logger logger = LoggerFactory.getLogger(RubyServiceProxyFactory.class);
+	private static final String RUBY_MAJOR_VERSION = "1.8";
 	private ScriptingContainer ruby;
 	
 	// TODO: make this class a singleton
@@ -65,7 +64,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private List<String> getUnExplodedLoadPaths(String rubyHome) throws IOException {
     // add github-services and Ruby libs to load path
     String[] paths = new String[] {
-        "lib", rubyHome+"/lib/ruby/1.8"
+        "lib", rubyHome+"/lib/ruby/"+RUBY_MAJOR_VERSION
     };
     // add Ruby gems used by github-services to load path
     List<String> loadPaths = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(".bundle/loadpath"));
@@ -76,7 +75,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private List<String> getExplodedLoadPaths(String rubyHome, String githubServicesHome) throws IOException {
     // add github-services and Ruby libs to load path
     String[] paths = new String[] {
-        githubServicesHome+"/lib", githubServicesHome, rubyHome+"/lib/ruby/1.8"
+        githubServicesHome+"/lib", githubServicesHome, rubyHome+"/lib/ruby/"+RUBY_MAJOR_VERSION
     };
     // add Ruby gems used by github-services to load path
     List<String> loadPaths = new ArrayList<String>();
@@ -87,20 +86,10 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
     return loadPaths;
 	}
 	
-	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] eventData) {
+	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, Map<?, ?> eventData) {
 		// instantiate service
-	  // FIXME
-	  Object data;
-	  if(false) {
-	    Object jsonClass = ruby.runScriptlet("JSON");
-	    data = ruby.callMethod(jsonClass, "parse", new String(eventData), IRubyObject.class);
-	  } else {
-	    data = new Gson().fromJson(new String(eventData), Map.class);
-      logger.debug("parsing input data with Gson lib: "+data);
-	  }
-		
 		Object[] args = new Object[] {
-				ruby.runScriptlet(":push"), config, data
+				ruby.runScriptlet(":push"), config, eventData
 		};
 		Object srv = ruby.runScriptlet(serviceName);
 		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);

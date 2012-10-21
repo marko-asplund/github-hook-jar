@@ -8,9 +8,3 @@ require "xmpp4r/muc"
 
 require "myapp"
 
-# FIXME
-#require "services/commit_msg_checker"
-#require "services/jira"
-#require "services/email"
-
-
