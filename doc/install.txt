@@ -1,0 +1,40 @@
+
+installation
+============
+
+Download and extract Jetty 8 (v8.1.7)
+from http://www.eclipse.org/jetty/
+- download and extract Jetty 8
+- set JETTY_HOME environment variable to point to Jetty directory
+
+JRuby 1.6.8
+- download and extract JRuby
+- set JRUBY_HOME environment variable to point to JRuby directory
+- add JRuby to path
+  export PATH=$PATH:$JRUBY_HOME/bin
+
+# fetch and configure Github Services
+sh github-hook-jar/bin/install-gh-services.sh
+export GITHUB_SERVICES_HOME=`pwd`
+
+# start up Jetty servlet container
+cd $JETTY_HOME
+JAVA_OPTIONS="-Dghj.ruby.home=$JRUBY_HOME -Dghj.github-services.home=$GITHUB_SERVICES_HOME" \
+	sh bin/jetty.sh start
+
+# build and deploy
+cd github-hook-jar
+mvn clean install
+cp target/github-hook-jar-*.war $JETTY_HOME/webapps
+
+
+=============
+
+# merge fork with upstream
+git remote add upstream https://github.com/github/github-services
+git fetch upstream
+git merge upstream/master
+# do merge
+git commit
+git push
+

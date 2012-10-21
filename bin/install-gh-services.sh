@@ -2,6 +2,10 @@
 
 SERVICES_REPO=https://github.com/marko-asplund/github-services.git
 #SERVICES_REPO=git@github.com:marko-asplund/github-services.git
+RUBY_VERSION=1.8
+
+# GitHub Services requires Ruby 1.8.7
+export JRUBY_OPTS="--$RUBY_VERSION"
 
 git clone $SERVICES_REPO
 if [ ! -d "github-services" ]; then
@@ -20,7 +24,7 @@ jruby -S gem install bundler
 jruby -S script/bootstrap
 
 # jruby-openssl needs to be installed manually
-jruby -S gem install -i vendor/gems/jruby/1.8 jruby-openssl
+jruby -S gem install -i vendor/gems/jruby/$RUBY_VERSION jruby-openssl
 
 # add jruby-openssl to jruby LOAD_PATH
 echo >> .bundle/loadpath

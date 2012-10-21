@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jruby.CompatVersion;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -18,6 +19,10 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
+import org.apache.commons.lang3.time.StopWatch;
+
+import com.google.gson.Gson;
+
 
 public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static Logger logger = LoggerFactory.getLogger(RubyServiceProxyFactory.class);
@@ -25,6 +30,9 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	
 	// TODO: make this class a singleton
 	public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
+	  
+	  StopWatch w = new StopWatch();
+	  w.start();
 		
 	  List<String> loadPaths = null;
 	  if(githubServicesHome == null)
@@ -32,6 +40,12 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	  else
       loadPaths = getExplodedLoadPaths(rubyHome, githubServicesHome);
 		ruby = new ScriptingContainer(LocalContextScope.CONCURRENT);
+		ruby.setCompatVersion(CompatVersion.RUBY1_8);
+		
+		logger.debug("ruby version: "+ruby.getCompatVersion());
+		logger.debug("java version: "+System.getProperty("java.version"));
+		
+		logger.debug("ScriptingContainer created: "+w.toString());
 		ruby.setLoadPaths(loadPaths);
 
 		// include some required gems
@@ -43,7 +57,9 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 		script += FileUtils.readFileToString(new File(githubServicesHome+"/requires.rb"));
 		
 		ruby.runScriptlet(script);
-		logger.debug("Factory initialized");
+    w.stop();
+
+    logger.debug("Factory fully initialized: "+w.toString());
 	}
 
 	private List<String> getUnExplodedLoadPaths(String rubyHome) throws IOException {
@@ -74,11 +90,17 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] eventData) {
 		// instantiate service
 	  // FIXME
-    Object jsonClass = ruby.runScriptlet("JSON");
-    IRubyObject input = ruby.callMethod(jsonClass, "parse", new String(eventData), IRubyObject.class);
+	  Object data;
+	  if(false) {
+	    Object jsonClass = ruby.runScriptlet("JSON");
+	    data = ruby.callMethod(jsonClass, "parse", new String(eventData), IRubyObject.class);
+	  } else {
+	    data = new Gson().fromJson(new String(eventData), Map.class);
+      logger.debug("parsing input data with Gson lib: "+data);
+	  }
 		
 		Object[] args = new Object[] {
-				ruby.runScriptlet(":push"), config, input
+				ruby.runScriptlet(":push"), config, data
 		};
 		Object srv = ruby.runScriptlet(serviceName);
 		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);
