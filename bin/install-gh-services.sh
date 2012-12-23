@@ -1,7 +1,20 @@
 #!/bin/sh
 
+#
+# tested on Mac OS X 10.7 and 10.8
+#
+# prerequisites:
+#
+# mac os x
+# - Xcode + command line tools (build environment for native extensions e.g. thin).
+#		you may need to add the compiler toolchain to path.
+#		(tested with Xcode 4.5.2)
+#
+#
+
+
 SERVICES_REPO=https://github.com/marko-asplund/github-services.git
-#SERVICES_REPO=git@github.com:marko-asplund/github-services.git
+#SERVICES_REPO=https://github.com/github/github-services.git
 RUBY_VERSION=1.8
 
 # GitHub Services requires Ruby 1.8.7
@@ -21,7 +34,7 @@ rvm reset
 jruby -S gem install bundler
 
 # install required Ruby gems
-jruby -S script/bootstrap
+JRUBY_OPTS="$JRUBY_OPTS -Xcext.enabled=true" jruby -S script/bootstrap
 
 # jruby-openssl needs to be installed manually
 jruby -S gem install -i vendor/gems/jruby/$RUBY_VERSION jruby-openssl

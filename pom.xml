@@ -7,7 +7,7 @@
   <name>GitHubHookJar</name>
 
   <properties>
-    <jruby.version>1.7.0.RC2</jruby.version>
+    <jruby.version>1.7.1</jruby.version>
   </properties>
 
   <build>
@@ -51,19 +51,19 @@
 	<dependency>
 		<groupId>commons-io</groupId>
 		<artifactId>commons-io</artifactId>
-		<version>2.3</version>
+		<version>2.4</version>
 	</dependency>
 
 	<dependency>
 		<groupId>com.google.code.gson</groupId>
 		<artifactId>gson</artifactId>
-		<version>2.1</version>
+		<version>2.2.2</version>
 	</dependency>
 
 	<dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
     
 	<dependency>

@@ -2,12 +2,12 @@
 installation
 ============
 
-Download and extract Jetty 8 (v8.1.7)
+Download and extract Jetty 8 (v8.1.8)
 from http://www.eclipse.org/jetty/
 - download and extract Jetty 8
 - set JETTY_HOME environment variable to point to Jetty directory
 
-JRuby 1.6.8
+JRuby 1.7.1
 - download and extract JRuby
 - set JRUBY_HOME environment variable to point to JRuby directory
 - add JRuby to path
@@ -15,7 +15,7 @@ JRuby 1.6.8
 
 # fetch and configure Github Services
 sh github-hook-jar/bin/install-gh-services.sh
-export GITHUB_SERVICES_HOME=`pwd`
+export GITHUB_SERVICES_HOME=`pwd`/github-services
 
 # start up Jetty servlet container
 cd $JETTY_HOME
