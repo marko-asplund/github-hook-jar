@@ -1,13 +1,17 @@
 
-TODO / 2012-09
-- re-test gh-services and JRuby
-- requires and tweaks
-- review architecture
-- refactor architecture
+TODO / 2012-10
+- review and refactor architecture (object modeling)
+- fix service configuration (see RubyServiceProxy)
 - publish on GitHub
+- JRuby problems
+	+ JRuby init performance
+	+ JRuby JSON structure passing issue
 
 
 TODO
+- requires and tweaks
+- upgrade to JRuby 1.7.0.RC1
+- re-test gh-services and JRuby
 - input data parsing
 - ruby dynamic service requires
   service-boot.rb:
@@ -122,6 +126,9 @@ handler
 # testing
 cd /home/aspluma/projects/personal/github-services
 curl -X POST --data-binary @payload1.json -D - http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
+
+
+echo "http/1.0 200 ok" | nc -l 127.0.0.1 5050
 
 http://requestb.in/
 
