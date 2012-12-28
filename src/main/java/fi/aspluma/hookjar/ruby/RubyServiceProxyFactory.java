@@ -86,7 +86,11 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
     return loadPaths;
 	}
 	
-	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, Map<?, ?> eventData) {
+	@Override
+	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] rawData, Map<?, ?> parsedData) {
+		Object jsonClass = ruby.runScriptlet("JSON");
+    IRubyObject eventData = ruby.callMethod(jsonClass, "parse", new String(rawData), IRubyObject.class);
+    
 		// instantiate service
 		Object[] args = new Object[] {
 				ruby.runScriptlet(":push"), config, eventData
