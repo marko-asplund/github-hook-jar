@@ -6,6 +6,8 @@ import java.util.Map;
 import fi.aspluma.hookjar.Handler;
 import fi.aspluma.hookjar.HandlerChain;
 import fi.aspluma.hookjar.HandlerType;
+import fi.aspluma.hookjar.ProxyInitializer;
+import fi.aspluma.hookjar.ruby.RubyProxyInitializer;
 
 public class StaticJavaConfiguration implements Configuration {
 
@@ -14,6 +16,14 @@ public class StaticJavaConfiguration implements Configuration {
     Map<String, HandlerChain> chains = new HashMap<String, HandlerChain>();
     
     HandlerChain hc1 = new HandlerChain("/foo");
+
+    @SuppressWarnings("unused")
+		// you can execute Ruby expressions for initializing the service.
+		// pass initializer to Handler constructor.
+    ProxyInitializer i = new RubyProxyInitializer(
+    		//String.format("svc.email_config['address'] = '%s'", "localhost")
+    		""
+    );
     Handler h = new Handler(HandlerType.RUBY, "Service::CommitMsgChecker");
     h.addParameter("message_format", "'\\[#WEB-\\d{1,5} status:\\d+ resolution:\\d+\\] .*$'");
     h.addParameter("recipients", "a@b.fi, c@d.fi");

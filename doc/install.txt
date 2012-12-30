@@ -16,6 +16,8 @@ JRuby 1.7.1
 # fetch and configure Github Services
 sh github-hook-jar/bin/install-gh-services.sh
 export GITHUB_SERVICES_HOME=`pwd`/github-services
+# configure Github Services, if required.
+# see GITHUB_SERVICES_HOME/config/*.yml
 
 # start up Jetty servlet container
 cd $JETTY_HOME

@@ -32,7 +32,7 @@ public class EventDispatcher {
       logger.debug("invoking handler: "+h);
       ServiceProxyFactory sf = factories.get(h.getType());
       ServiceProxy srv = sf.createServiceProxy(h.getClassName(), h.getParameters(), eventData, data);
-      srv.configure();
+      srv.configure(h.getInitializer());
       srv.processRequest();
     }
   }

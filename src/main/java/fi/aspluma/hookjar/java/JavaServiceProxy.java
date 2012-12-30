@@ -4,7 +4,7 @@ import java.util.Map;
 
 import fi.aspluma.hookjar.ServiceProxy;
 
-public interface JavaServiceProxy extends ServiceProxy {
-  void setConfiguration(Map<String, String> config);
-  void setEventData(Map<?, ?> data);
+public abstract class JavaServiceProxy extends ServiceProxy {
+  public abstract void setConfiguration(Map<String, String> config);
+  public abstract void setEventData(Map<?, ?> data);
 }

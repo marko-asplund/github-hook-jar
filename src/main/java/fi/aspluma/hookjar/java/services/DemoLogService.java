@@ -7,15 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.java.JavaServiceProxy;
 
-public class DemoLogService implements JavaServiceProxy {
+public class DemoLogService extends JavaServiceProxy {
   private static final Logger logger = LoggerFactory.getLogger(DemoLogService.class);
+  @SuppressWarnings("unused")
   private Map<String, String> config;
   private Map<?, ?> eventData;
-
-  @Override
-  public void configure() {
-    logger.debug("configure: "+config);
-  }
 
   @Override
   public void processRequest() {

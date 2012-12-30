@@ -1,6 +1,9 @@
 package fi.aspluma.hookjar;
 
-public interface ServiceProxy {
-  void configure();
-  void processRequest();
+public abstract class ServiceProxy {
+  public void configure(ProxyInitializer initializer) {
+  	if(initializer != null)
+  		initializer.initialize(this);
+	}
+  public abstract void processRequest();
 }
