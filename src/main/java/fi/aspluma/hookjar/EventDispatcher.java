@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import fi.aspluma.hookjar.config.StaticJavaConfiguration;
-import fi.aspluma.hookjar.java.JavaServiceProxyFactory;
-import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
+import fi.aspluma.hookjar.config.Configuration;
 
 public class EventDispatcher {
   private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
@@ -19,8 +17,8 @@ public class EventDispatcher {
   private Map<String, HandlerChain> chains = new HashMap<String, HandlerChain>();
   private Map<HandlerType, ServiceProxyFactory> factories;
   
-  public EventDispatcher() throws IOException {
-    initialize();
+  public EventDispatcher(Configuration config) throws IOException {
+    initialize(config);
   }
 
   public void dispatch(String requestURI, byte[] eventData) {
@@ -28,33 +26,21 @@ public class EventDispatcher {
     logger.debug("parsing input data with Gson lib: "+data);
     
     HandlerChain chain = chains.get(requestURI);  // NB: exact match
+    if(chain == null)
+    	throw new RuntimeException("no chain found for URI: "+requestURI);
     for(Handler h : chain.getHandlers()) {
       logger.debug("invoking handler: "+h);
-      ServiceProxyFactory sf = factories.get(h.getType());
-      ServiceProxy srv = sf.createServiceProxy(h.getClassName(), h.getParameters(), eventData, data);
-      srv.configure(h.getInitializer());
-      srv.processRequest();
-    }
-  }
-  
-  private void initialize() throws IOException {
-	  factories = getServiceProxyFactories();
-	  chains = new StaticJavaConfiguration().getConfiguredHandlerChains();
-  }
-  
-  private Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() throws IOException {
-    String rubyHome = System.getProperty("ghj.ruby.home");
-    String githubServicesHome = System.getProperty("ghj.github-services.home");
-    
-    if(rubyHome == null || githubServicesHome == null) {
-      throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
-    }
-    
-    Map<HandlerType, ServiceProxyFactory> f = new HashMap<HandlerType, ServiceProxyFactory>();
-    f.put(HandlerType.RUBY, new RubyServiceProxyFactory(rubyHome, githubServicesHome));
-    f.put(HandlerType.JAVA, new JavaServiceProxyFactory());
-    return f;
-  }
-  
 
+      ServiceProxyFactory sf = factories.get(h.getType());
+      ServiceProxy svc = sf.createServiceProxy(h, eventData, data);
+      svc.configure(h.getInitializer());
+      svc.processRequest();
+    }
+  }
+  
+  private void initialize(Configuration config) throws IOException {
+	  factories = config.getServiceProxyFactories();
+	  chains = config.getConfiguredHandlerChains();
+  }
+  
 }

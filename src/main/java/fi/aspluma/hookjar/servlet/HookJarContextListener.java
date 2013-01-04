@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.EventDispatcher;
+import fi.aspluma.hookjar.config.StaticJavaConfiguration;
 
 
 @WebListener
@@ -18,7 +19,7 @@ public class HookJarContextListener implements ServletContextListener {
   public void contextInitialized(ServletContextEvent sce) {
     logger.debug("contextInitialized");
     try {
-      eventDispatcher = new EventDispatcher();
+      eventDispatcher = new EventDispatcher(new StaticJavaConfiguration());
       sce.getServletContext().setAttribute("fi.aspluma.hookjar.eventDispatcher", eventDispatcher);
     } catch (Exception e) {
       logger.error("failed to instantiate EventDispatcher", e);

@@ -18,6 +18,7 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.aspluma.hookjar.Handler;
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
 
@@ -27,8 +28,17 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static final String RUBY_MAJOR_VERSION = "1.8";
 	private ScriptingContainer ruby;
 	
-	// TODO: make this class a singleton
-	public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
+	
+	public RubyServiceProxyFactory() throws IOException {
+		this(System.getProperty("ghj.ruby.home"), System.getProperty("ghj.github-services.home"));
+	}
+	
+	// TODO: make this class a singleton?
+	@SuppressWarnings("unused")
+  public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
+		if(rubyHome == null || githubServicesHome == null) {
+			throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
+		}
 	  
 	  StopWatch w = new StopWatch();
 	  w.start();
@@ -87,15 +97,15 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	}
 	
 	@Override
-	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] rawData, Map<?, ?> parsedData) {
+	public ServiceProxy createServiceProxy(Handler h, byte[] rawData, Map<?, ?> parsedData) {
 		Object jsonClass = ruby.runScriptlet("JSON");
     IRubyObject eventData = ruby.callMethod(jsonClass, "parse", new String(rawData), IRubyObject.class);
     
 		// instantiate service
 		Object[] args = new Object[] {
-				ruby.runScriptlet(":push"), config, eventData
+				ruby.runScriptlet(":push"), h.getParameters(), eventData
 		};
-		Object srv = ruby.runScriptlet(serviceName);
+		Object srv = ruby.runScriptlet(h.getClassName());
 		IRubyObject service = ruby.callMethod(srv, "new", args, IRubyObject.class);
 		
 		return new RubyServiceProxy(ruby, service);

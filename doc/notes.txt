@@ -1,15 +1,16 @@
 
-TODO / 2012-10
-- review and refactor architecture (+object modeling)
-- fix service configuration (see RubyServiceProxy)
-- JRuby problems
-	+ JRuby init performance
+TODO / 2012-12
+- implement test case
+- dynamic loading for Ruby
 
 
 TODO
+- review and refactor architecture (+object modeling)
+- input data parsing (passing Java JSON to Ruby Liquid templates) 
+- JRuby problems
+	+ optimize JRuby init performance
 - requires and tweaks
-- input data parsing
-- ruby dynamic service requires
+- Ruby dynamic service requires
   service-boot.rb:
   require "services/email"
   a) load dynamically
@@ -23,19 +24,20 @@ TODO
   + command pattern
 - proxy/factory exceptions
 - split code base into project + modules?
-- create java service
 - create groovy service (low)
 - UI (low)
 
 QUESTIONS
 - github-services
-	packaging: exploded? jar?
+	packaging: exploded? jar?: DONE, exploded by default (both supported)
 	load path
-	config? email etc.?
-	myapp.rb
+	config? email etc.?: DONE
+	myapp.rb: DONE, src/main/resources/myapp.rb
 
 
 DONE
+- fix service configuration (see RubyServiceProxy)
+- create java service: see DemoLogService
 - re-test gh-services and JRuby
 - JRuby problems
 	+ JRuby JSON structure passing issue
@@ -59,48 +61,26 @@ DONE
   how to disable sinatra? redefine Service::App
 - load path issue: OK
 
-=======================================================
-
-/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
-
 * json GEM causes conflict
 
+=======================================================
 
-git clone https://github.com/github/github-services.git
-cd github-services
-bundle install
+running integration tests
+-------------------------
 
+# start the jira service mock
+echo "http/1.0 200 ok" | nc -l 127.0.0.1 5050
 
-java -Djrxuby.debug.loadService=true -cp target/classes:../jruby-1.6.7/lib/jruby.jar:$HOME/.m2/repository/commons-io/commons-io/2.3/commons-io-2.3.jar:$HOME/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:$HOME/.m2/repository/org/yaml/snakeyaml/1.10/snakeyaml-1.10.jar:github-services.jar MyService
+# start a local SMTP server (e.g. Apache James server)
 
-
-mv github-services.dir github-services; jar cvf github-services.jar github-services; mv github-services github-services.dir
-
-
+# run IT tests
+mvn -Dghj.ruby.home=$JRUBY_HOME -Dghj.github-services.home=$GITHUB_SERVICES_HOME -Pintegration-test clean install
 
 =======================================================
 
-cd /Users/aspluma/projects/koku/dev/kohtikumppanuutta
-G=github-services/vendor/gems/ruby/1.8/gems
-H=github-services
-R=/Users/aspluma/.rvm/rubies/ree-1.8.7-2012.02//lib/ruby/1.8
-
-export LP=$H:$G/liquid-2.3.0/lib:$H/lib:$G/addressable-2.2.7/lib:$G/faraday-0.7.6/lib:$G/rack-1.4.1/lib:$R:$G/sinatra-1.2.6/lib:\
-$G/tilt-1.2.2/lib:$G/tinder-1.7.0/lib:$G/activesupport-3.0.10/lib:$G/faraday_middleware-0.8.7/lib:$G/xmpp4r-0.5/lib:\
-$G/i18n-0.5.0/lib:$G/mail-2.3.0/lib:$G/mime-types-1.18/lib:$G/treetop-1.4.10/lib
-
-ruby -I$LP  github-services/tst.rb
-
-=======================================================
-
-cd /Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
-
-mvn exec:java -Dexec.mainClass=ServiceRunner
-
-cd /Users/aspluma/projects/personal/git-commit-policy/github-hook-jar/github-services-1
-
-curl -D - -X POST --data-binary @github-hook-jar/src/test/resources/sample1.json http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
-
+# testing
+cd /home/aspluma/projects/personal/github-services
+curl -D - -X POST --data-binary @src/test/resources/sample1.json http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
 
 =======================================================
 
@@ -125,16 +105,22 @@ handler
 =======================================================
 
 
-# testing
-cd /home/aspluma/projects/personal/github-services
-curl -X POST --data-binary @payload1.json -D - http://localhost:8080/github-hook-jar-0.0.1-SNAPSHOT/foo
-
-# run the jira service mock
-echo "http/1.0 200 ok" | nc -l 127.0.0.1 5050
-
-# run local SMTP server (e.g. Apache James server)
+=======================================================
 
 
 =======================================================
 
+/Users/aspluma/projects/personal/git-commit-policy/github-hook-jar
+
+
+
+git clone https://github.com/github/github-services.git
+cd github-services
+bundle install
+
+
+java -Djrxuby.debug.loadService=true -cp target/classes:../jruby-1.6.7/lib/jruby.jar:$HOME/.m2/repository/commons-io/commons-io/2.3/commons-io-2.3.jar:$HOME/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:$HOME/.m2/repository/org/yaml/snakeyaml/1.10/snakeyaml-1.10.jar:github-services.jar MyService
+
+
+mv github-services.dir github-services; jar cvf github-services.jar github-services; mv github-services github-services.dir
 

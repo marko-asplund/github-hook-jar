@@ -2,17 +2,18 @@ package fi.aspluma.hookjar.java;
 
 import java.util.Map;
 
+import fi.aspluma.hookjar.Handler;
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
 
 public class JavaServiceProxyFactory implements ServiceProxyFactory {
 
 	@Override
-	public ServiceProxy createServiceProxy(String serviceName, Map<String, String> config, byte[] rawData, Map<?, ?> parsedData) {
+	public ServiceProxy createServiceProxy(Handler h, byte[] rawData, Map<?, ?> parsedData) {
     try {
-      Class<?> c = Class.forName(serviceName);
+      Class<?> c = Class.forName(h.getClassName());
       JavaServiceProxy p = (JavaServiceProxy) c.newInstance();
-      p.setConfiguration(config);
+      p.setConfiguration(h.getParameters());
       p.setEventData(parsedData);
       return p;
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
