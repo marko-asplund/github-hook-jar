@@ -5,8 +5,8 @@ push events to external systems using the
 Ready-made post-receive hooks are provided for many systems such
 as issue trackers and CI server, but custom hooks can also be implemented.
 
-<img style="width:200px; height:auto"
-src="https://github.com/marko-asplund/github-hook-jar/tree/master/doc/images/ghj-diagram.png">
+<img style="width:400px;height:auto" align="middle"
+src="https://raw.github.com/marko-asplund/github-hook-jar/master/doc/images/ghj-diagram.png">
 
 github-hook-jar is a container for running existing and custom
 [github-services](https://github.com/github/github-services) inside a Java web application
