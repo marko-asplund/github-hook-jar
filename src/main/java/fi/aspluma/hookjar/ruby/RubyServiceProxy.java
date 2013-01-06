@@ -29,7 +29,9 @@ public class RubyServiceProxy extends ServiceProxy {
 	}
 	
 	void runScriptlet(String scriptlet) {
-		ruby.put("svc", service);
+		String vn = String.format("_thread_%d_svc", Thread.currentThread().getId());
+		scriptlet = scriptlet.replaceAll("#\\{svc\\}", vn);
+		ruby.put(vn, service);
 		ruby.runScriptlet(scriptlet);
 	}
 

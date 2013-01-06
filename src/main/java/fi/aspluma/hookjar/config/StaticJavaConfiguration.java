@@ -29,7 +29,7 @@ public class StaticJavaConfiguration implements Configuration {
 		// you can execute Ruby expressions for initializing the service.
 		// pass initializer to Handler constructor.
     ProxyInitializer i = new RubyProxyInitializer(
-    		//String.format("svc.email_config['address'] = '%s'", "localhost")
+    		//String.format("#{svc}.email_config['address'] = '%s'", "127.0.0.1")
     		""
     );
     DefaultHandler h = new DefaultHandler(HandlerType.RUBY, "Service::CommitMsgChecker");
