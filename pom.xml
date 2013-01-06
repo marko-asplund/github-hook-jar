@@ -7,7 +7,7 @@
   <name>GitHubHookJar</name>
 
   <properties>
-    <jruby.version>1.7.1</jruby.version>
+    <jruby.version>1.7.2</jruby.version>
   </properties>
 
   <build>

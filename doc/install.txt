@@ -7,7 +7,7 @@ from http://www.eclipse.org/jetty/
 - download and extract Jetty 8
 - set JETTY_HOME environment variable to point to Jetty directory
 
-JRuby 1.7.1
+JRuby 1.7.2
 - download and extract JRuby
 - set JRUBY_HOME environment variable to point to JRuby directory
 - add JRuby to path
