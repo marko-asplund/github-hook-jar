@@ -108,6 +108,7 @@ public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	
 	@Override
 	public ServiceProxy createServiceProxy(Handler h, byte[] rawData, Map<?, ?> parsedData) {
+		// workaround for issue #1. could optimize this case by skipping JSON parsing in EventDispatcher
 		Object jsonClass = ruby.runScriptlet("JSON");
     IRubyObject eventData = ruby.callMethod(jsonClass, "parse", new String(rawData), IRubyObject.class);
     
