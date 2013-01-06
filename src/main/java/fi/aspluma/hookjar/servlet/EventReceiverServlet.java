@@ -15,6 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.EventDispatcher;
 
+/**
+ * A {@link HttpServlet} subclass that receives incoming post-receive event notifications from GitHub repositories
+ * via HTTP and dispatches the HTTP requests to {@link EventDispatcher} for processing.
+ * 
+ * @author aspluma
+ */
 @WebServlet("/")
 public class EventReceiverServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;

@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.java.JavaServiceProxy;
 
+/**
+ * A Java-based {@link ServiceProxy} implementation class meant for validation and demonstrative purposes.
+ * 
+ * @author aspluma
+ */
 public class DemoLogService extends JavaServiceProxy {
   private static final Logger logger = LoggerFactory.getLogger(DemoLogService.class);
   @SuppressWarnings("unused")

@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 import fi.aspluma.hookjar.EventDispatcher;
 import fi.aspluma.hookjar.config.StaticJavaConfiguration;
 
-
+/**
+ * Initializes github-hook-jar on servlet context startup.
+ * 
+ * @author aspluma
+ */
 @WebListener
 public class HookJarContextListener implements ServletContextListener {
   private static final Logger logger = LoggerFactory.getLogger(HookJarContextListener.class);

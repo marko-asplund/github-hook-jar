@@ -1,6 +1,5 @@
 package fi.aspluma.hookjar.config;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +12,11 @@ import fi.aspluma.hookjar.java.JavaServiceProxyFactory;
 import fi.aspluma.hookjar.ruby.RubyProxyInitializer;
 import fi.aspluma.hookjar.ruby.RubyServiceProxyFactory;
 
+/**
+ * Static Java based implementation of the Configuration interface.
+ * 
+ * @author aspluma
+ */
 public class StaticJavaConfiguration implements Configuration {
 
   @Override
@@ -59,7 +63,7 @@ public class StaticJavaConfiguration implements Configuration {
   }
 
 	@Override
-  public Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() throws IOException {
+  public Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() {
 		Map<HandlerType, ServiceProxyFactory> f = new HashMap<HandlerType, ServiceProxyFactory>();
 		f.put(HandlerType.RUBY, new RubyServiceProxyFactory());
 		f.put(HandlerType.JAVA, new JavaServiceProxyFactory());

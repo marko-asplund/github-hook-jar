@@ -3,6 +3,11 @@ package fi.aspluma.hookjar;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Default {@link Handler} interface implementation.
+ * 
+ * @author aspluma
+ */
 public class DefaultHandler implements Handler {
   private HandlerType type;
   private String className;

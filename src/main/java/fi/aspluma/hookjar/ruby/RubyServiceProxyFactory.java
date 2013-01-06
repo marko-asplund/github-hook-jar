@@ -18,24 +18,34 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.aspluma.hookjar.FaultException;
 import fi.aspluma.hookjar.Handler;
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
 
 
+/**
+ * Ruby {@link ServiceProxyFactory} implementation base class.
+ * 
+ * @author aspluma
+ */
 public class RubyServiceProxyFactory implements ServiceProxyFactory {
 	private static Logger logger = LoggerFactory.getLogger(RubyServiceProxyFactory.class);
 	private static final String RUBY_MAJOR_VERSION = "1.8";
 	private ScriptingContainer ruby;
 	
 	
-	public RubyServiceProxyFactory() throws IOException {
-		this(System.getProperty("ghj.ruby.home"), System.getProperty("ghj.github-services.home"));
+	public RubyServiceProxyFactory() {
+		try {
+	    initialize(System.getProperty("ghj.ruby.home"), System.getProperty("ghj.github-services.home"));
+    } catch (IOException e) {
+    	throw new FaultException("failed to initialize Ruby runtime", e);
+    }
 	}
 	
 	// TODO: make this class a singleton?
-	@SuppressWarnings("unused")
-  public RubyServiceProxyFactory(String rubyHome, String githubServicesHome) throws IOException {
+  @SuppressWarnings("unused")
+  private void initialize(String rubyHome, String githubServicesHome) throws IOException {
 		if(rubyHome == null || githubServicesHome == null) {
 			throw new RuntimeException("ghj.ruby.home and ghj.github-services.home system properties must be set");
 		}

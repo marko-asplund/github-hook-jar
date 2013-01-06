@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.TypeConverter;
 
+@Deprecated
 public class EventDataConverter {
 	private Map<Class<?>, TypeConverter<? extends IRubyObject>> converters = new HashMap<Class<?>, TypeConverter<? extends IRubyObject>>();
 	private ScriptingContainer ruby;

@@ -4,7 +4,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class EventDispatcherTest {
     }
 
 		@Override
-    public Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() throws IOException {
+    public Map<HandlerType, ServiceProxyFactory> getServiceProxyFactories() {
 			Map<HandlerType, ServiceProxyFactory> f = new HashMap<HandlerType, ServiceProxyFactory>();
 			f.put(HandlerType.JAVA, new ServiceProxyFactory() {
 				@Override

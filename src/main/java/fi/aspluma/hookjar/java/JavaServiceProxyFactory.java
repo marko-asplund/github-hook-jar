@@ -6,6 +6,11 @@ import fi.aspluma.hookjar.Handler;
 import fi.aspluma.hookjar.ServiceProxy;
 import fi.aspluma.hookjar.ServiceProxyFactory;
 
+/**
+ * Java {@link ServiceProxyFactory} implementation base class.
+ * 
+ * @author aspluma
+ */
 public class JavaServiceProxyFactory implements ServiceProxyFactory {
 
 	@Override

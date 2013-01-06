@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.aspluma.hookjar.ServiceProxy;
 
-
+/**
+ * Ruby based {@link ServiceProxy} implementation base class.
+ * 
+ * @author aspluma
+ */
 public class RubyServiceProxy extends ServiceProxy {
   private static final Logger logger = LoggerFactory.getLogger(RubyServiceProxy.class);
   private ScriptingContainer ruby;
